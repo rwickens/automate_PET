@@ -1,7 +1,9 @@
 # Automate PET - Bedard lab
 
-My name is Rebekah Wickens, and I am a PhD student in Marc-Andre Bedard's lab (Montreal Neurological Institute).
-I've written a pipeline in Python to process PET images that are in the MINC file format to generate SUVR images in patient-space and in template-space. This program assumes that one has processed the MRI files on CIVET and have generated files for transformation to standard space. 
+My name is Rebekah Wickens, and I am a PhD student of Marc-Andre Bedard (Montreal Neurological Institute).
+I've written a pipeline in Python for quantitative PET image processing on MINC files. This program assumes that one has processed the MRI files on CIVET and have generated files for transformation to standard space. 
+
+The steps accomplished are: 
 
 - (1) Averages a dynamic (multi-frame) PET scan into one static image 
 - (2) Calculates the standardized uptake values based on weight and dose 
@@ -12,7 +14,7 @@ I've written a pipeline in Python to process PET images that are in the MINC fil
 - (7) Does steps 5 and 6 in patient-space by doing a reverse transformation of the mask/atlas file (necessarily in standard space)
 - (8) If desired, can split the initial dynamic PET scan into frames for the purposes of examination. (Section needs to be un-commented)
 
-For the automate_PET.py program, the following is the information for the user. 
+The following is the information for the user. 
 
 -----------INFORMATION FOR USER:----------- 
 - Three inputs to run the program: weight (kg), dose (mCi), and patient folder (full path needed)
