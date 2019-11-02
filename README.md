@@ -1,5 +1,9 @@
-# automate_PET_bedard_lab
-My work towards automating the Bedard lab's PET image processing pipeline (Montreal Neurological Institute)
+# Automate PET - Bedard lab
+
+My name is Rebekah Wickens, and I am a PhD student in Marc-Andre Bedard's lab (Montreal Neurological Institute)
+This is some of my work towards automating the Bedard lab's PET image processing pipeline
+
+For the automate_PET.py program, the following is the information for the user. 
 
 -----------INFORMATION FOR USER:----------- 
 - Three inputs to run the program: weight (kg), dose (mCi), and patient folder (full path needed)
