@@ -12,7 +12,7 @@ The steps accomplished are:
 - (5) Takes the SUVR based on the reference region(s) of your choice (if multiple given, mean is taken)
 - (6) Blurs the image in the resolution(s) of your choice
 - (7) Does steps 5 and 6 in patient-space by doing a reverse transformation of the mask/atlas file (necessarily in standard space)
-- (8) If desired, can split the initial dynamic PET scan into frames for the purposes of examination. (Section needs to be un-commented)
+- (8) If desired, split the initials dynamic PET scan into single frames for the purposes of examination. (This part of code needs to be un-commented to work.)
 
 The following is the information for the user. 
 
