@@ -10,7 +10,7 @@ I've written a pipeline in Python to process PET images that are in the MINC fil
 - (5) Takes the SUVR based on the reference region(s) of your choice (if multiple given, mean is taken)
 - (6) Blurs the image in the resolution(s) of your choice
 - (7) Does steps 5 and 6 in patient-space by doing a reverse transformation of the mask/atlas file (necessarily in standard space)
-- (8) If un-commented, also can split the initial dynamic PET scan into frames for the purposes of examination. 
+- (8) If desired, can split the initial dynamic PET scan into frames for the purposes of examination. (Section needs to be un-commented)
 
 For the automate_PET.py program, the following is the information for the user. 
 
