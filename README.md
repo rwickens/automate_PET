@@ -21,7 +21,6 @@ The steps that the pipeline achieves are:
 -----------INFORMATION FOR USER:----------- 
 - Three inputs to run the program: weight (kg), dose (mCi), and patient folder (full path needed)
 - Example input to run program: python /home/minc/projectfolder/automate_PET.py 102 8.4 /home/minc/projectfolder/patientfolder
-- Assumes you are in a project directory containing patients' folders.
 - In this patient folder, you must have the IT file, TAL file, GRID file, and T1 file from CIVET.
 - The program searches for files with specific suffixes. The defaults are based on CIVET outputs. These are customizable in the JSON configuration file. 
 - In the project directory, keep the JSON configuration file. In this file, you can change defaults (e.g, mask (reference tissue) used, standard template used), and suffixes for your file naming conventions.  
