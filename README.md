@@ -2,7 +2,9 @@
 
 My name is Rebekah Wickens. I'm a PhD student of Marc-Andre Bedard (Montreal Neurological Institute). 
 
-I've written a pipeline in Python for quantitative PET image processing on MINC files. This program assumes that one has processed the MRI files on CIVET and has generated files for transformation to standard space. 
+I've written a pipeline in Python for quantitative PET image processing on MINC files. 
+
+This program assumes that the MRI file inputted has been spatially normalized, and that the xfm files for this transformation have been kept.  
 
 The steps that the pipeline achieves are: 
 
