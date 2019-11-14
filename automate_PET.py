@@ -193,7 +193,6 @@ def main(weight, dose, patient_folder):
         # 3. Take the SUV
 
         constant = dose * 1000 / weight
-        #constant = round(constant, 4)
         print("dose * 1000 / weight = " + str(constant))
         f.write("dose * 1000 / weight = " + str(constant))
         f.flush()
@@ -262,7 +261,6 @@ def main(weight, dose, patient_folder):
         print("the mean or means are", means_array)
         f.write("the mean or means are "+ str(means_array))
         mask_SUV = statistics.mean(means_array)
-        #mask_SUV = round(mask_SUV, 4)
         mask_SUV = str(mask_SUV)
         print("the extracted average of the mask section(s) is", mask_SUV)
         f.write("the extracted average of the mask section(s) is " + str(mask_SUV))
