@@ -3,7 +3,7 @@
 """-----------INFORMATION FOR USER:----------- 
 # Three inputs to run the program: weight (kg), dose (mCi), and patient folder (full path needed)
 # Example input to run program: python /home/minc/projectfolder/automate_PET.py 102 8.4 /home/minc/projectfolder/patientfolder
-# Assumes you have a project directory containing patients' folders.
+# Assumes you have a project directory that contains patients' folders.
 # In this patient folder, you must have the IT file, TAL file, GRID file, and T1 file from CIVET,
 # In the project directory, keep the json configuration file. In this file, you can change defaults (e.g, mask (reference tissue) used, standard template used) 
 # If the json config is not present, program will look for WM mask file (WM_0.99_new.mnc) and MNI standard template file (mni_icbm152_t1_tal_nlin_sym_09c.mnc) in this project folder.
@@ -18,7 +18,6 @@ import os
 from importlib import import_module
 import json
 import glob
-import re
 import statistics
 
 newest_minctools = max(glob.glob("/opt/minc/1.9.*"))
@@ -47,7 +46,7 @@ def splice(path: Path, modifier) -> Path:
     return path.parent.joinpath(path.stem + modifier).with_suffix(path.suffix)
 
 def main(weight, dose, patient_folder):
-
+    global minc_counter
     projectdir = Path(patient_folder).parent   
     print("projectdir is", projectdir)
     patient_dir = Path(patient_folder)
@@ -55,7 +54,7 @@ def main(weight, dose, patient_folder):
 
     json_path = projectdir / 'config.json'
 
-    #if item in json file doesn't exist, depend on defaults... 
+    #if item in json file doesn't exist, throw warning and depend on defaults... 
     if json_path.exists():
         config = json.load(json_path.open())
         PETsuffix = config['PET_SUFFIX']
@@ -128,20 +127,32 @@ def main(weight, dose, patient_folder):
     talpath = Path(talpath[0])
     ITpath= Path(ITpath[0])
 
-    patient_code = str(os.path.basename(patient_folder)) 
+    patient_code = str(os.path.basename(patient_folder))
     
-    with open(patient_folder + '/_output_log_' + patient_code + '.txt', 'w') as f:
+    minc_cmd_dict = {}
+    minc_counter = 0 
+    
+    output_txt_file = patient_folder + '/_output_log_' + patient_code + '.txt'
+    with open(output_txt_file, 'w') as f:
         def bash_command(*args):
+            global minc_counter
             bash_output = subprocess.check_output([str(c) for c in args], universal_newlines=True)
+            minc_cmd_dict[minc_counter]=([str(c) for c in args])
+            minc_counter += 1
             bash_output = str(bash_output)
             print(bash_output)
-            f.write(bash_output) 
+            f.write(bash_output)
+            f.flush()
 
         def bash_command_shell(*args):
+            global minc_counter
             bash_output_shell = subprocess.check_output(args, shell=True, universal_newlines=True, executable='/bin/bash')
+            minc_cmd_dict[minc_counter]=args
+            minc_counter += 1
             bash_output_shell = str(bash_output_shell)
             print(bash_output_shell)
             f.write(bash_output_shell)
+            f.flush() 
         
         mylist = []
         xfmlist = []
@@ -182,7 +193,10 @@ def main(weight, dose, patient_folder):
         # 3. Take the SUV
 
         constant = dose * 1000 / weight
+        #constant = round(constant, 4)
         print("dose * 1000 / weight = " + str(constant))
+        f.write("dose * 1000 / weight = " + str(constant))
+        f.flush()
         outputPETpath = splice(outputPETpath, "_suv")
         mylist.append(outputPETpath)
         print("Go take a coffee break! The next couple of steps take 3-4 minutes to run.")
@@ -233,9 +247,12 @@ def main(weight, dose, patient_folder):
             maskbinvalue = minicsv
 
         mask_SUV = subprocess.check_output(['mincstats', '-mask', str(mask_or_atlas_path), '-mask_binvalue', str(maskbinvalue), str(outputPETpath), '-mean'], universal_newlines = True)
+        minc_cmd_dict[minc_counter]=['mincstats', '-mask', str(mask_or_atlas_path), '-mask_binvalue', str(maskbinvalue), str(outputPETpath), '-mean']
+        minc_counter += 1
         mask_SUV = str(mask_SUV)
         print("the raw output given by minc/bash is", mask_SUV)
-        f.write("the raw output given by minc/bash is " + mask_SUV)        
+        f.write("the raw output given by minc/bash is " + mask_SUV)
+        f.flush()        
         mask_SUV_split = mask_SUV.split()
 
         means_array = []
@@ -245,9 +262,11 @@ def main(weight, dose, patient_folder):
         print("the mean or means are", means_array)
         f.write("the mean or means are "+ str(means_array))
         mask_SUV = statistics.mean(means_array)
+        #mask_SUV = round(mask_SUV, 4)
         mask_SUV = str(mask_SUV)
         print("the extracted average of the mask section(s) is", mask_SUV)
         f.write("the extracted average of the mask section(s) is " + str(mask_SUV))
+        f.flush()
         outputPETpath = splice(outputPETpath, '_SUVR')
         mylist.append(outputPETpath)
         bash_command('mincmath', '-clobber', '-div', '-const', mask_SUV, mylist[-2], outputPETpath)
@@ -261,7 +280,7 @@ def main(weight, dose, patient_folder):
             outputPETpath = splice(deepcopyPETpath, blur_word).with_suffix('')
             outputPETpath_for_list = splice(outputPETpath, '_blur').with_suffix('.mnc')
             templist.append(outputPETpath_for_list)
-            bash_command('mincblur', '-clobber','-fwhm', i, mylist[-2], outputPETpath)
+            bash_command('mincblur', '-clobber','-fwhm', i, mylist[-1], outputPETpath)
         for j in range(len(templist)):
             mylist.append(templist[j])
         
@@ -274,9 +293,12 @@ def main(weight, dose, patient_folder):
         PETsubjectmask = patient_folder + "/_subject_mask_" + patient_code + ".mnc"
         bash_command('mincresample', '-clobber', '-like', mylist_patient[-2], '-nearest', '-transform', outputPETpath_xfm, '-invert_transformation', mask_or_atlas_path, PETsubjectmask)
         mask_SUV_patient = subprocess.check_output(['mincstats', '-mask', str(PETsubjectmask), '-mask_binvalue', str(maskbinvalue), str(mylist_patient[-2]), '-mean'], universal_newlines = True)
+        minc_cmd_dict[minc_counter] = ['mincstats', '-mask', str(PETsubjectmask), '-mask_binvalue', str(maskbinvalue), str(mylist_patient[-2]), '-mean']
+        minc_counter += 1
         mask_SUV_patient = str(mask_SUV_patient)
         print("the raw output on minc/bash is", mask_SUV_patient)
         f.write("the raw output on minc/bash is" + mask_SUV_patient)
+        f.flush()
 
         mask_SUV_patient_split = mask_SUV_patient.split()
 
@@ -289,7 +311,8 @@ def main(weight, dose, patient_folder):
         mask_SUV_patient = statistics.mean(means_array_patient)
         mask_SUV_patient = str(mask_SUV_patient)
         print("the extracted average of the mask section(s) is", mask_SUV_patient)
-        f.write("the extracted average of the mask section(s) is " + mask_SUV_patient)       
+        f.write("the extracted average of the mask section(s) is " + mask_SUV_patient)
+        f.flush()       
         outputPETpath_patient = splice(mylist_patient[-1], '_patient_SUVR')
         mylist_patient.append(outputPETpath_patient)
         bash_command('mincmath', '-clobber', '-div', '-const', mask_SUV_patient, mylist_patient[-2], outputPETpath_patient)
@@ -303,12 +326,18 @@ def main(weight, dose, patient_folder):
             outputPETpath_patient = splice(deepcopyPETpath_patient, blur_word_patient).with_suffix('')
             outputPETpath_patient_for_list = splice(outputPETpath_patient, '_blur').with_suffix('.mnc')
             templist_patient.append(outputPETpath_patient_for_list)
-            bash_command('mincblur', '-clobber', '-fwhm', i, mylist_patient[-2], outputPETpath_patient)
+            bash_command('mincblur', '-clobber', '-fwhm', i, mylist_patient[-1], outputPETpath_patient)
         for j in range(len(templist_patient)):
             mylist_patient.append(templist_patient[j])
 
         #8B. Show patient's SUVR PET image in their MRI space  
         
         bash_command('register', mylist_patient[-1], MRIpath)
+        
+        #9. Show a log of all of the minc commands that were run
+
+        with open(patient_folder + '/_'+ patient_code + '_command_log.csv', 'w') as g:
+            for key in minc_cmd_dict.keys():
+                g.write("%s,%s\n"%(key,minc_cmd_dict[key]))
 
 main(**vars(args))
