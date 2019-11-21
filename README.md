@@ -10,7 +10,7 @@ The steps that the pipeline achieves are:
 
 - (1) Averages a dynamic (multi-frame) PET scan into one static image 
 - (2) Calculates the standardized uptake values based on weight and dose 
-- (3) Autoregisters the PET file to the MRI file using linear regression
+- (3) Autoregisters the PET file to the MRI file using mutual information and linear regression
 - (4) Transforms the PET file into standard template (this requires certain xfm files from CIVET)
 - (5) Takes the SUVR based on the reference region(s) of your choice (if multiple given, the mean is taken)
 - (6) Blurs the image in the resolution(s) of your choice
