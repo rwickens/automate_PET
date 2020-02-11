@@ -1,14 +1,6 @@
 #!/usr/bin/python
-
-"""-----------INFORMATION FOR USER:----------- 
-# Three inputs to run the program: weight (kg), dose (mCi), and patient folder (full path needed)
-# Example input to run program: python /home/minc/projectfolder/automate_PET.py 102 8.4 /home/minc/projectfolder/patientfolder
-# Assumes you have a project directory that contains patients' folders.
-# In this patient folder, you must have the IT file, TAL file, GRID file, and T1 file from CIVET,
-# In the project directory, keep the json configuration file. In this file, you can change defaults (e.g, mask (reference tissue) used, standard template used) 
-# If the json config is not present, program will look for WM mask file (WM_0.99_new.mnc) and MNI standard template file (mni_icbm152_t1_tal_nlin_sym_09c.mnc) in this project folder.
-# Note: This program will overwrite files (if the file name of one of your ouputs already exists in that folder).   
-"""
+# Rebekah Wickens, 2020
+# Version 1.0.0
 
 from pathlib import Path
 from copy import deepcopy
@@ -54,7 +46,6 @@ def main(weight, dose, patient_folder):
 
     json_path = projectdir / 'config.json'
 
-    #if item in json file doesn't exist, throw warning and depend on defaults... 
     if json_path.exists():
         config = json.load(json_path.open())
         PETsuffix = config['PET_SUFFIX']
@@ -198,7 +189,7 @@ def main(weight, dose, patient_folder):
         f.flush()
         outputPETpath = splice(outputPETpath, "_suv")
         mylist.append(outputPETpath)
-        print("Go take a coffee break! The next couple of steps take 3-4 minutes to run.")
+        print("Go take a coffee break! The next steps take several minutes to run.")
         bash_command('mincmath', '-clobber', '-div', mylist[-2], '-const', constant, outputPETpath)
 
         # 4. Automatic coregistration of subject PET to subject MRI to obtain .xfm files
