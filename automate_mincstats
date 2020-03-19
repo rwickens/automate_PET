@@ -1,0 +1,73 @@
+import os
+import subprocess
+from pathlib import Path
+import numpy
+import pandas as pd
+import re
+import json
+import argparse
+from copy import deepcopy
+
+parser = argparse.ArgumentParser('my_args')
+parser.add_argument('json_file')    
+args = parser.parse_args()
+
+def main(json_file):
+
+    json_path = Path(json_file)
+
+    if json_path.exists():
+        config = json.load(json_path.open())
+        FOLDER_OF_SCANS = config["FOLDER_OF_SCANS"]
+        ROI_PATHS = config["ROI_PATHS"]
+
+    roi_df = pd.DataFrame()
+    templist = []
+
+    for i in ROI_PATHS:
+        number_regions = subprocess.check_output(['volume_stats', '-quiet', '-max', i], universal_newlines = True)
+        number_regions = int(number_regions)
+        templist.append(number_regions)
+    newlist = []
+    for item in templist:
+        if item >= 2:
+            newnewlist = []
+            for d in range(1, item+1):
+                newnewlist.append(d)
+            newlist.append(newnewlist)
+        else:
+            newlist.append([item])
+
+    newdict = {}
+    counter = 0
+    for z in newlist:
+        newdict[ROI_PATHS[counter]] = z
+        counter += 1
+
+    def clean(i): 
+        i = i.strip()
+        i = re.sub("[^0-9.]", "", i)
+        return i
+
+    for filename in os.listdir(FOLDER_OF_SCANS):
+        if filename.endswith(".mnc") == True: 
+            full_filename = os.path.join(FOLDER_OF_SCANS,filename)
+            for ROI, binvalues in newdict.items():
+                for subbinvalue in binvalues:
+                    subbinvalue = str(subbinvalue)
+                    result_mean = subprocess.check_output(['mincstats', '-mask', str(ROI), '-mask_binvalue', subbinvalue, str(full_filename), '-mean'], universal_newlines = True)
+                    result_mean = clean(result_mean)
+                    result_median = subprocess.check_output(['mincstats', '-mask', str(ROI), '-mask_binvalue', subbinvalue, str(full_filename), '-median'], universal_newlines = True)
+                    result_median = clean(result_median)
+                    result_max = subprocess.check_output(['mincstats', '-mask', str(ROI), '-mask_binvalue', subbinvalue, str(full_filename), '-max'], universal_newlines = True)
+                    result_max = clean(result_max)
+                    ROI_BASENAME = os.path.basename(Path(ROI))
+                    roi_df = roi_df.append({"File": filename, "ROI": ROI_BASENAME, "binvalue": subbinvalue, "result_mean": result_mean, "result_median": result_median, "result_max":result_max}, ignore_index=True)
+    roi_df = roi_df[['File','ROI','binvalue','result_mean', 'result_median','result_max']]
+    
+    json_parent = json_path.parent
+    roi_df.to_csv(json_parent/'roi_df.csv')
+    #roi_df.to_csv('roi_df.csv')
+    #saves to file where python file is when nothing specified
+
+main(**vars(args))
