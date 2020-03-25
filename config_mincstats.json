@@ -1,0 +1,7 @@
+{
+    "FOLDER_OF_SCANS": "/home/minc/Desktop/crap",
+    "ROI_PATHS": [],
+    "MNI_ATLAS_RESAMPLED_PATH": ["/home/minc/Desktop/RBDStudy_AllMasks/RBDStudy/atlas_res_RBD_blur4.mnc"],
+    "MNI_ATLAS_BIN_VALUES": [20],
+    "STATS_REQUESTED": ["-mean", "-median", "-max"]
+}
