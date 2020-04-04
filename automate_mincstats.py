@@ -27,36 +27,24 @@ def main(json_file):
     if len(MNI_ATLAS_RESAMPLED_PATH) != 0:
         MNI_ATLAS_RESAMPLED_PATH = MNI_ATLAS_RESAMPLED_PATH[0]
     
-    templist = []
+    num_reg_atlas_list = []
     for i in ROI_PATHS:
         number_regions = subprocess.check_output(['volume_stats', '-quiet', '-max', i], universal_newlines = True)
         number_regions = int(number_regions)
-        templist.append(number_regions)
-    newlist = []
-    for item in templist:
-        if item >= 2:
-            newnewlist = []
-            for d in range(1, item+1):
-                newnewlist.append(d)
-            newlist.append(newnewlist)
-        else:
-            newlist.append([item])
+        num_reg_atlas_list.append(number_regions)
+    
+    num_reg_atlas_list = [[d for d in range(1, item+1)] for item in num_reg_atlas_list]
 
     newdict = {}
     counter = 0
-    for z in newlist:
+    for z in num_reg_atlas_list:
         newdict[ROI_PATHS[counter]] = z
         counter += 1
     
     if len(MNI_ATLAS_RESAMPLED_PATH) != 0:
         newdict[MNI_ATLAS_RESAMPLED_PATH] = MNI_ATLAS_BIN_VALUES
     
-    #Resample atlas, save in folder 
-
-    stats_requested = []
-    for stat in STATS_REQUESTED:
-        stat = stat.lower()
-        stats_requested.append(stat)
+    STATS_REQUESTED = [stat.lower() for stat in STATS_REQUESTED]
     
     stat_dict = {}
     file_roi_bin_dict = {}
@@ -69,7 +57,7 @@ def main(json_file):
             for ROI, binvalues in newdict.items():
                 for subbinvalue in binvalues:
                     subbinvalue = str(subbinvalue)
-                    for stat in stats_requested: 
+                    for stat in STATS_REQUESTED: 
                         stat_dict[stat] = subprocess.check_output(['mincstats', '-mask', str(ROI), '-mask_binvalue', subbinvalue, '-quiet', str(full_filename), stat], universal_newlines = True)
                         stat_dict[stat] = float(stat_dict[stat])
                     ROI_BASENAME = os.path.basename(Path(ROI))
@@ -81,13 +69,16 @@ def main(json_file):
     new_cols = unstacked.columns.map(' | '.join)
     unstacked.columns = new_cols
 
-    col_order = [] 
-    combinations = [(a,b) for a in roi_df.ROI.unique() for b in stats_requested]
+    combinations = [(a,b) for a in roi_df.ROI.unique() for b in STATS_REQUESTED]
 
+    col_order = [(b+' | '+a) for a,b in combinations]
+    """
+    col_order = [] 
     for a,b in combinations:
         formatting = (b+' | '+a)
         col_order.append(formatting)
-        
+    """    
+    
     unstacked = unstacked[col_order]
     
     #formatting of columns
