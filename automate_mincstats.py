@@ -72,12 +72,6 @@ def main(json_file):
     combinations = [(a,b) for a in roi_df.ROI.unique() for b in STATS_REQUESTED]
 
     col_order = [(b+' | '+a) for a,b in combinations]
-    """
-    col_order = [] 
-    for a,b in combinations:
-        formatting = (b+' | '+a)
-        col_order.append(formatting)
-    """    
     
     unstacked = unstacked[col_order]
     
