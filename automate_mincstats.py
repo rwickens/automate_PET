@@ -3,7 +3,6 @@ import subprocess
 from pathlib import Path
 import numpy
 import pandas as pd
-import re
 import json
 import argparse
 from copy import deepcopy
