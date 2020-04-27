@@ -18,8 +18,6 @@ DEFAULT_MINC_CONFIG = MINC_DIR / 'minc-toolkit-config.sh'
 DEFAULT_MINC_BEST_LIN = MINC_DIR.joinpath('bin/bestlinreg_s')
 
 parser = argparse.ArgumentParser('image processing inputs')
-parser.add_argument('weight', type=float)
-parser.add_argument('dose', type=float)
 parser.add_argument('patient_folder')    
 
 args = parser.parse_args()
@@ -37,11 +35,13 @@ def splice(path: Path, modifier) -> Path:
         path = dir_name / newbase
     return path.parent.joinpath(path.stem + modifier).with_suffix(path.suffix)
 
-def main(weight, dose, patient_folder):
+def main(patient_folder):
+#def main(weight, dose, patient_folder):
+    
     patient_code = str(os.path.basename(patient_folder))
     output_txt_file = patient_folder + '/_output_log_' + patient_code + '.txt'
     command_log_file = patient_folder + '/_'+ patient_code + '_command_log.csv'
-    
+   
     minc_cmd_dict = {}
     global minc_counter
     minc_counter = 0 
@@ -67,8 +67,6 @@ def main(weight, dose, patient_folder):
                 g.write("%s,%s\n"%(minc_counter,minc_cmd_dict[minc_counter]))
                 minc_counter += 1
             
-            print_and_write("Weight inputted is (kg):", weight)
-            print_and_write("Dose inputted is (mCi):", dose)
             projectdir = Path(patient_folder).parent   
             print_and_write("Project folder used is:", projectdir)
             patient_dir = Path(patient_folder)
@@ -83,6 +81,7 @@ def main(weight, dose, patient_folder):
                 MRIsuffix = config['MRI_SUFFIX']
                 talsuffix = config['TAL_SUFFIX']
                 ITsuffix = config['IT_SUFFIX']
+                weight_dose_suffix = config['WEIGHT_DOSE_SUFFIX']
                 MNItemplatepath = config['MNI_TEMPLATE_PATH']
                 mask_or_atlas_path = config['MASK_OR_ATLAS_PATH']
                 maskbinvalue = config['MASK_BIN_VALUE']
@@ -90,11 +89,12 @@ def main(weight, dose, patient_folder):
                 mincbestlinregpath = config['MINC_BEST_LIN_REG_PATH']
                 preferred_blur_list = config['PREFERRED_BLUR']
             else:
-                print_and_write("json file not detected so going with defaults (MNI 152, WM_0.99 mask)")
+                print_and_write("WARNING: json file not detected so going with defaults (MNI 152, WM_0.99 mask)")
                 PETsuffix = "4D_MC01.mnc" 
                 MRIsuffix = "_t1.mnc"   
                 talsuffix = "t1_tal.xfm"
                 ITsuffix = "_It.xfm"
+                weight_dose_suffix = "weight_dose.txt"
                 MNItemplatepath = projectdir / "mni_icbm152_t1_tal_nlin_sym_09c.mnc"
                 mask_or_atlas_path = projectdir / "WM_0.99_new.mnc"
                 maskbinvalue = [1]
@@ -107,18 +107,21 @@ def main(weight, dose, patient_folder):
             talpath = []
             ITpath = []
             gridpath = []
+            weight_dose_path = []
 
             PETpath = glob.glob(patient_folder + "/*" + PETsuffix)
             MRIpath = glob.glob(patient_folder + "/*" + MRIsuffix)
             talpath = glob.glob(patient_folder + "/*" + talsuffix)
             ITpath = glob.glob(patient_folder + "/*" + ITsuffix)
             gridpath = glob.glob(patient_folder + "/*It_grid_0.mnc")
+            weight_dose_path = glob.glob(patient_folder + "/*" + weight_dose_suffix)
 
             print_and_write("PET file used:", PETpath)
             print_and_write("MRI file used:", MRIpath)
             print_and_write("Tal file used:", talpath)
             print_and_write("IT file used:", ITpath)
             print_and_write("Grid file used:", gridpath)
+            print_and_write("Weight and dose file used:", weight_dose_path)
 
             if len(gridpath) == 0: 
                 print_and_write("No grid file detected! Minc will likely raise an error about this during the transformations.")
@@ -139,11 +142,21 @@ def main(weight, dose, patient_folder):
             check_file_structure(MRIpath, MRIsuffix, 1)
             check_file_structure(talpath, talsuffix)
             check_file_structure(ITpath, ITsuffix)
+            check_file_structure(weight_dose_path, weight_dose_suffix)
 
             PETpath = Path(PETpath[0])
             MRIpath = Path(MRIpath[0])
             talpath = Path(talpath[0])
             ITpath= Path(ITpath[0])
+            weight_dose_path = Path(weight_dose_path[0])
+
+            e = open(weight_dose_path, 'r')
+            list_contents = e.read().split()
+            weight = float(list_contents[0])
+            dose = float(list_contents[1])
+
+            print_and_write("Weight inputted is (kg):", weight)
+            print_and_write("Dose inputted is (mCi):", dose)
             
             def bash_command(*args):
                 global minc_counter
