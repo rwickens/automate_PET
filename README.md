@@ -15,7 +15,7 @@ The steps that the pipeline achieves are:
 - (5) Takes the SUVR based on the reference region(s) of your choice (if multiple given, the mean is taken)
 - (6) Blurs the image in the resolution(s) of your choice
 - (7) Does steps 5 and 6 in patient-space by doing a reverse transformation of the mask/atlas file (necessarily in standard space)
-- (8) If desired, split the initials dynamic PET scan into single frames for the purposes of examination. (This part of code needs to be un-commented to work.)
+- (8) If desired, split the initial dynamic PET scan into single frames for the purposes of examination. (This part of code needs to be un-commented to work.)
 
 
 -----------INFORMATION FOR USER:----------- 
