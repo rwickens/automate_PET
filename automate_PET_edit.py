@@ -36,7 +36,6 @@ def splice(path: Path, modifier) -> Path:
     return path.parent.joinpath(path.stem + modifier).with_suffix(path.suffix)
 
 def main(patient_folder):
-#def main(weight, dose, patient_folder):
     
     patient_code = str(os.path.basename(patient_folder))
     output_txt_file = patient_folder + '/_output_log_' + patient_code + '.txt'
@@ -72,8 +71,8 @@ def main(patient_folder):
             patient_dir = Path(patient_folder)
             print_and_write("Patient folder used is:", patient_dir)
 
-            json_path = projectdir / 'config.json'
-            print_and_write("json config file used is:", json_path)
+            json_path = projectdir / 'config_edit.json'
+            print_and_write("json config file used is:", json_path, "\n json config information:")
 
             if json_path.exists():
                 config = json.load(json_path.open())
@@ -89,7 +88,7 @@ def main(patient_folder):
                 mincbestlinregpath = config['MINC_BEST_LIN_REG_PATH']
                 preferred_blur_list = config['PREFERRED_BLUR']
             else:
-                print_and_write("WARNING: json file not detected so going with defaults (MNI 152, WM_0.99 mask)")
+                print_and_write("WARNING! json file not detected so GOING WITH DEFAULTS")
                 PETsuffix = "4D_MC01.mnc" 
                 MRIsuffix = "_t1.mnc"   
                 talsuffix = "t1_tal.xfm"
@@ -101,7 +100,14 @@ def main(patient_folder):
                 mincconfigpath = DEFAULT_MINC_CONFIG
                 mincbestlinregpath = DEFAULT_MINC_BEST_LIN
                 preferred_blur_list = [4,6,8]
-            
+
+                print_and_write("Standard template path used:", MNItemplatepath)
+                print_and_write("Mask or atlas path, for reference region, used:", mask_or_atlas_path)
+                print_and_write("Mask binary values used:", maskbinvalue)
+                print_and_write("Version of Minc config used:", mincconfigpath)
+                print_and_write("Version of Minc best lin reg:", mincbestlinregpath)
+                print_and_write("Chosen FWHM blurs in mm:", preferred_blur_list)
+
             PETpath = []
             MRIpath = []
             talpath = []
@@ -115,13 +121,6 @@ def main(patient_folder):
             ITpath = glob.glob(patient_folder + "/*" + ITsuffix)
             gridpath = glob.glob(patient_folder + "/*It_grid_0.mnc")
             weight_dose_path = glob.glob(patient_folder + "/*" + weight_dose_suffix)
-
-            print_and_write("PET file used:", PETpath)
-            print_and_write("MRI file used:", MRIpath)
-            print_and_write("Tal file used:", talpath)
-            print_and_write("IT file used:", ITpath)
-            print_and_write("Grid file used:", gridpath)
-            print_and_write("Weight and dose file used:", weight_dose_path)
 
             if len(gridpath) == 0: 
                 print_and_write("No grid file detected! Minc will likely raise an error about this during the transformations.")
@@ -149,6 +148,13 @@ def main(patient_folder):
             talpath = Path(talpath[0])
             ITpath= Path(ITpath[0])
             weight_dose_path = Path(weight_dose_path[0])
+
+            print_and_write("PET file used:", PETpath)
+            print_and_write("MRI file used:", MRIpath)
+            print_and_write("Tal file used:", talpath)
+            print_and_write("IT file used:", ITpath)
+            print_and_write("Grid file used:", gridpath)
+            print_and_write("Weight and dose file used:", weight_dose_path)
 
             e = open(weight_dose_path, 'r')
             list_contents = e.read().split()
@@ -292,7 +298,7 @@ def main(patient_folder):
             
             # 8A. Finished. Show the patient's SUVR PET image on MNI template
             
-            bash_command('register', mylist[-1], MNItemplatepath)
+            #bash_command('register', mylist[-1], MNItemplatepath)
 
             # 6B - Take the SUVR in patient space
             
@@ -305,7 +311,6 @@ def main(patient_folder):
 
             mask_SUV_patient_split = mask_SUV_patient.split()
 
-            #modify this to accommodate the multiple means given that -quiet has now been added
             means_array_patient = [float(mask_SUV_patient_split[i]) for i in range(len(mask_SUV_patient_split)) if i != 0 and mask_SUV_patient_split[i-1] == 'Mean:']
 
             print_and_write("The mean or means of the mask are (in patient-space)", means_array_patient)
@@ -339,6 +344,14 @@ def main(patient_folder):
 
             #8B. Show patient's SUVR PET image in their MRI space  
             
-            bash_command('register', mylist_patient[-1], MRIpath)
+            #bash_command('register', mylist_patient[-1], MRIpath)
             
 main(**vars(args))
+
+# bash script for batch processing
+# comment out the two instances of register (suppress these pop-ups)
+# type in terminal: 
+# for i in <full/path_to/PET_folder/*/> ; 
+# do python /home/minc/Desktop/edit-automate-pet/automate_PET_edit.py $i; done
+
+#for i in /home/minc/Desktop/edit-automate-pet/*/ ; do python /home/minc/Desktop/edit-automate-pet/automate_PET_edit.py $i; done
