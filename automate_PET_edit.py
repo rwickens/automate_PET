@@ -347,11 +347,3 @@ def main(patient_folder):
             #bash_command('register', mylist_patient[-1], MRIpath)
             
 main(**vars(args))
-
-# bash script for batch processing
-# comment out the two instances of register (suppress these pop-ups)
-# type in terminal: 
-# for i in <full/path_to/PET_folder/*/> ; 
-# do python /home/minc/Desktop/edit-automate-pet/automate_PET_edit.py $i; done
-
-#for i in /home/minc/Desktop/edit-automate-pet/*/ ; do python /home/minc/Desktop/edit-automate-pet/automate_PET_edit.py $i; done
