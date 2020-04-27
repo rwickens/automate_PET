@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # Rebekah Wickens, 2020
-# Version 1.0.0
+# Version 1.0.1
 
 from pathlib import Path
 from copy import deepcopy
