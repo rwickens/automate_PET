@@ -101,12 +101,12 @@ def main(patient_folder):
                 mincbestlinregpath = DEFAULT_MINC_BEST_LIN
                 preferred_blur_list = [4,6,8]
 
-                print_and_write("Standard template path used:", MNItemplatepath)
-                print_and_write("Mask or atlas path, for reference region, used:", mask_or_atlas_path)
-                print_and_write("Mask binary values used:", maskbinvalue)
-                print_and_write("Version of Minc config used:", mincconfigpath)
-                print_and_write("Version of Minc best lin reg:", mincbestlinregpath)
-                print_and_write("Chosen FWHM blurs in mm:", preferred_blur_list)
+            print_and_write("Standard template path used:", MNItemplatepath)
+            print_and_write("Mask or atlas path, for reference region, used:", mask_or_atlas_path)
+            print_and_write("Mask binary values used:", maskbinvalue)
+            print_and_write("Version of Minc config used:", mincconfigpath)
+            print_and_write("Version of Minc best lin reg:", mincbestlinregpath)
+            print_and_write("Chosen FWHM blurs in mm:", preferred_blur_list)
 
             PETpath = []
             MRIpath = []
@@ -131,7 +131,7 @@ def main(patient_folder):
                 if len(input_path) > 1:
                     print_and_write("Multiple", input_path, "files ending in", input_suffix, ". Check that there are only one patient's files in this patient folder!")
                     if MRImessage == 1:
-                        print_and_write("Did you check that only one CIVET MRI file is in this folder (not raw MRI files?")
+                        print_and_write("Did you check that only one CIVET-processed MRI file is in this folder (not raw MRI files?")
                     raise SystemExit(0)
                 elif len(input_path) == 0: 
                     print_and_write("No file found. Please check that your", input_path, "ends in", input_suffix)
@@ -230,7 +230,7 @@ def main(patient_folder):
             mylist.append(outputPETpath)
             bash_command_shell("source " + str(mincconfigpath))
             bash_command(mincbestlinregpath, '-clobber', '-nmi', '-lsq6', mylist[-2], MRIpath, outputPETpath_xfm, outputPETpath)
-            mylist_patient = deepcopy(mylist)  # Divergence in image processing (template space versus patient space)
+            mylist_patient = deepcopy(mylist)  # Divergence in image processing (template-space versus patient-space)
             
             # 5. Linear and non-linear transformations to put the PET file into MNI space (toST = to Standard Template)
             
@@ -271,15 +271,15 @@ def main(patient_folder):
             mask_SUV_subprocess = ['mincstats', '-mask', str(mask_or_atlas_path), '-mask_binvalue', str(maskbinvalue), str(outputPETpath), '-mean']
             mask_SUV = subprocess.check_output(mask_SUV_subprocess, universal_newlines = True)
             write_to_minc_dict(mask_SUV_subprocess)
-            print_and_write("the raw output given by mincstats in MNI-space is", mask_SUV)
+            print_and_write("The raw output given by mincstats (in MNI-space) is", mask_SUV)
             mask_SUV_split = mask_SUV.split()
 
             means_array = [float(mask_SUV_split[i]) for i in range(len(mask_SUV_split)) if i != 0 and mask_SUV_split[i-1] == 'Mean:']
 
-            print_and_write("The mean or means of the mask in MNI-space are", means_array)
+            print_and_write("The mean(s) of the reference region mask areas (in MNI-space) are:", means_array)
             mask_SUV = statistics.mean(means_array)
             mask_SUV = str(mask_SUV)
-            print_and_write("The extracted average of the mask (reference region) section(s) in MNI-space is", mask_SUV)
+            print_and_write("The extracted average of the mean(s) of the reference region mask area(s) (in MNI-space) is:", mask_SUV)
             outputPETpath = splice(outputPETpath, '_SUVR')
             mylist.append(outputPETpath)
             bash_command('mincmath', '-clobber', '-div', '-const', mask_SUV, mylist[-2], outputPETpath)
@@ -307,28 +307,28 @@ def main(patient_folder):
             mask_SUV_patient_subprocess = ['mincstats', '-mask', str(PETsubjectmask), '-mask_binvalue', str(maskbinvalue), str(mylist_patient[-2]), '-mean']
             mask_SUV_patient = subprocess.check_output(mask_SUV_patient_subprocess, universal_newlines = True)
             write_to_minc_dict(mask_SUV_patient_subprocess)
-            print_and_write("The raw output of mincstats in patient-space is", mask_SUV_patient)
+            print_and_write("The raw output given by mincstats (in patient-space) is:", mask_SUV_patient)
 
             mask_SUV_patient_split = mask_SUV_patient.split()
 
             means_array_patient = [float(mask_SUV_patient_split[i]) for i in range(len(mask_SUV_patient_split)) if i != 0 and mask_SUV_patient_split[i-1] == 'Mean:']
 
-            print_and_write("The mean or means of the mask are (in patient-space)", means_array_patient)
+            print_and_write("The mean(s) of the reference region mask area(s) are (in patient-space):", means_array_patient)
             mask_SUV_patient = statistics.mean(means_array_patient)
-            print_and_write("The extracted average of the mask (reference region) section(s) in patient-space is", mask_SUV_patient)
+            print_and_write("The extracted average of the means(s) of the reference region area(s) (in patient-space) is:", mask_SUV_patient)
             outputPETpath_patient = splice(mylist_patient[-1], '_patient_SUVR')
             mylist_patient.append(outputPETpath_patient)
             bash_command('mincmath', '-clobber', '-div', '-const', mask_SUV_patient, mylist_patient[-2], outputPETpath_patient)
 
-            #This is a check to see that radioactivity in patient-space matches that of MNI space to ensure transformations were done correctly:
+            #This is a check to see that radioactivity in patient-space matches that of MNI-space to ensure transformations were done correctly:
         
             percent_mask_difference = abs(float(mask_SUV) - float(mask_SUV_patient))/float(mask_SUV_patient)*100
-            print_and_write("% MASK RADIOACTIVITY DIFFERENCE (MNI versus PATIENT SPACE)", percent_mask_difference)  
+            print_and_write("% Mask radioactivity difference (template versus patient-space)", percent_mask_difference)  
             
             if percent_mask_difference > 5:
-                print_and_write("WARNING: the reference region values in patient-space versus MNI-space seem to differ more than 5%! This could mean that a transformation went wrong.")
+                print_and_write("WARNING! The reference region values in patient-space versus MNI-space seem to differ more than 5%! This could mean that a transformation went wrong.")
             else:
-                print_and_write("TEST PASSED (Comparing template- and patient-space reference region radioactivity levels in order to examine whether transformation were correctly applied.")
+                print_and_write("Test passed (Comparing template- and patient-space reference region radioactivity levels in order to examine whether transformation were correctly applied.")
 
             # 7B. Blur patient space in select resolution(s) (default = 4, 6, and 8mm)
             
