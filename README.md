@@ -21,7 +21,7 @@ The steps that the pipeline achieves are:
 -----------INFORMATION FOR USER:----------- 
 - One input to run the program: patient folder (full path needed)
 - Example input to run program: python /home/minc/projectfolder/automate_PET.py /home/minc/projectfolder/patientfolder
-- In this patient folder, you must have the PET file, IT file, TAL file, GRID file, and T1 file from CIVET, as well as a txt file containing two numbers separated by a space: weight of patient and dose of radioactivity injected 
+- In this patient folder, you must have the PET file, IT file, TAL file, GRID file, and T1 file from CIVET, as well as a txt file containing two numbers separated by a space: weight of patient (kg) and dose (mCi) of radioactivity injected 
 - The program searches for the above files with specific suffixes. The defaults are based on CIVET outputs. These are customizable in the JSON configuration file. 
 - In the project directory, keep the JSON configuration file. In this file, you can change defaults (e.g, mask (reference tissue) used, standard template used), and suffixes for your file naming conventions.  
 - If the JSON config is not present, program will look for WM mask file (WM_0.99_new.mnc) and MNI standard template file (mni_icbm152_t1_tal_nlin_sym_09c.mnc) in this project folder.
