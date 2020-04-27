@@ -1,3 +1,5 @@
+#!bin/bash
+
 # In order to run: 
 # Suppress the register commands in steps 8A and *B
 # Change the "full/path_to/project_folder/*/ and the 
