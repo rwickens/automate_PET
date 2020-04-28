@@ -185,14 +185,12 @@ def main(patient_folder):
             print_and_write("Dose inputted is (mCi):", dose)
             
             def bash_command(*args):
-                global minc_counter
                 bash_output = subprocess.check_output([str(c) for c in args], universal_newlines=True)
                 write_to_minc_dict(args)
                 print_and_write(str(bash_output))
                 return bash_output
 
             def bash_command_shell(*args):
-                global minc_counter
                 bash_output_shell = subprocess.check_output(args, shell=True, universal_newlines=True, executable='/bin/bash')
                 write_to_minc_dict(args)
                 print_and_write(str(bash_output_shell))
