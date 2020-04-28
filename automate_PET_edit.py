@@ -38,7 +38,8 @@ def splice(path: Path, modifier) -> Path:
 def main(patient_folder):
     
     patient_code = str(os.path.basename(patient_folder))
-    output_txt_file = patient_folder + '/_output_log_' + patient_code + '.txt'
+    print("patient code is:", patient_code)
+    output_txt_file = patient_folder + '/_'+ patient_code + '_output_log.txt'
     command_log_file = patient_folder + '/_'+ patient_code + '_command_log.csv'
    
     minc_cmd_dict = {}
@@ -70,9 +71,10 @@ def main(patient_folder):
             print_and_write("Project folder used is:", projectdir)
             patient_dir = Path(patient_folder)
             print_and_write("Patient folder used is:", patient_dir)
+            print_and_write("Patient code is:", patient_code)
 
             json_path = projectdir / 'config_edit.json'
-            print_and_write("json config file used is:", json_path, "\n json config information:")
+            print_and_write("json config file used is:", json_path, "\njson config information:")
 
             if json_path.exists():
                 config = json.load(json_path.open())
@@ -215,7 +217,7 @@ def main(patient_folder):
             # 3. Take the SUV
 
             constant = dose * 1000 / weight
-            print_and_write("dose * 1000 / weight")
+            print_and_write("dose * 1000 / weight  <----- constant to generate SUV's")
             print_and_write(dose, "* 1000 /", weight, "= ", constant)
             outputPETpath = splice(outputPETpath, "_suv")
             mylist.append(outputPETpath)
@@ -302,7 +304,7 @@ def main(patient_folder):
 
             # 6B - Take the SUVR in patient space
             
-            PETsubjectmask = patient_folder + "/_subject_mask_" + patient_code + ".mnc"
+            PETsubjectmask = patient_folder + "/_" + patient_code + "_subject_mask.mnc"
             bash_command('mincresample', '-clobber', '-like', mylist_patient[-2], '-nearest', '-transform', outputPETpath_xfm, '-invert_transformation', mask_or_atlas_path, PETsubjectmask)
             mask_SUV_patient_subprocess = ['mincstats', '-mask', str(PETsubjectmask), '-mask_binvalue', str(maskbinvalue), str(mylist_patient[-2]), '-mean']
             mask_SUV_patient = subprocess.check_output(mask_SUV_patient_subprocess, universal_newlines = True)
@@ -323,12 +325,12 @@ def main(patient_folder):
             #This is a check to see that radioactivity in patient-space matches that of MNI-space to ensure transformations were done correctly:
         
             percent_mask_difference = abs(float(mask_SUV) - float(mask_SUV_patient))/float(mask_SUV_patient)*100
-            print_and_write("% Mask radioactivity difference (template versus patient-space)", percent_mask_difference)  
+            print_and_write("% Mask radioactivity difference (template versus patient-space):", percent_mask_difference)  
             
             if percent_mask_difference > 5:
-                print_and_write("WARNING! The reference region values in patient-space versus MNI-space seem to differ more than 5%! This could mean that a transformation went wrong.")
+                print_and_write("WARNING! The reference region values in patient-space versus MNI-space seem to differ more than 5%! This could mean that transformations were incorrectly applied.")
             else:
-                print_and_write("Test passed (Comparing template- and patient-space reference region radioactivity levels in order to examine whether transformation were correctly applied.")
+                print_and_write("Test passed. Minimal percentage difference between reference region radioactivity in template- and patient-space.")
 
             # 7B. Blur patient space in select resolution(s) (default = 4, 6, and 8mm)
             
