@@ -6,6 +6,7 @@ from pathlib import Path
 from copy import deepcopy
 import argparse
 import subprocess
+import sys
 import os
 from importlib import import_module
 import json
@@ -36,9 +37,7 @@ def splice(path: Path, modifier) -> Path:
     return path.parent.joinpath(path.stem + modifier).with_suffix(path.suffix)
 
 def main(patient_folder):
-    
-    patient_code = str(os.path.basename(patient_folder))
-    print("patient code is:", patient_code)
+    patient_code = str(os.path.basename(Path(patient_folder)))
     output_txt_file = patient_folder + '/_'+ patient_code + '_output_log.txt'
     command_log_file = patient_folder + '/_'+ patient_code + '_command_log.csv'
    
@@ -74,8 +73,26 @@ def main(patient_folder):
             print_and_write("Patient code is:", patient_code)
 
             json_path = projectdir / 'config_edit.json'
-            print_and_write("json config file used is:", json_path, "\njson config information:")
 
+            def ask_consent(recursion=False):
+                if recursion == False:
+                    warning_text = "WARNING! json file not detected by the program. \n It is supposed to be located at " + json_path + " Have you changed its location or have you renamed the file to something other than config.json? \n Would you like the program to continue with the default settings (y/n)? "       
+                elif recursion == True:
+                    warning_text = "Would you like the program continue with the default settings (Y/N)? "
+                f.write(warning_text)
+                user_choice = input(warning_text)
+                if user_choice == 'Y' or user_choice ==  'y':
+                    print_statement = "The user opted to use the defaults settings. "
+                    print_and_write(print_statement)
+                elif user_choice == 'N' or user_choice == 'n':
+                    print_statement = "The user rejected using the defaults. \n Because no config.json file was detectable and the defaults were not selected, the program will now terminate."
+                    print_and_write(print_statement)
+                    sys.exit(0)
+                else: 
+                    print_statement = "Invalid response. Please enter 'y' or 'n'"
+                    print(print_statement)
+                    ask_consent(recursion=True)
+            
             if json_path.exists():
                 config = json.load(json_path.open())
                 PETsuffix = config['PET_SUFFIX']
@@ -90,7 +107,7 @@ def main(patient_folder):
                 mincbestlinregpath = config['MINC_BEST_LIN_REG_PATH']
                 preferred_blur_list = config['PREFERRED_BLUR']
             else:
-                print_and_write("WARNING! json file not detected so GOING WITH DEFAULTS")
+                ask_consent()
                 PETsuffix = "4D_MC01.mnc" 
                 MRIsuffix = "_t1.mnc"   
                 talsuffix = "t1_tal.xfm"
@@ -134,10 +151,11 @@ def main(patient_folder):
                     print_and_write("Multiple", input_path, "files ending in", input_suffix, ". Check that there are only one patient's files in this patient folder!")
                     if MRImessage == 1:
                         print_and_write("Did you check that only one CIVET-processed MRI file is in this folder (not raw MRI files?")
-                    raise SystemExit(0)
+                    sys.exit(0)
+
                 elif len(input_path) == 0: 
                     print_and_write("No file found. Please check that your", input_path, "ends in", input_suffix)
-                    raise SystemExit(0)
+                    sys.exit(0)
             
             check_file_structure(PETpath,PETsuffix)
             check_file_structure(MRIpath, MRIsuffix, 1)
@@ -171,12 +189,14 @@ def main(patient_folder):
                 bash_output = subprocess.check_output([str(c) for c in args], universal_newlines=True)
                 write_to_minc_dict(args)
                 print_and_write(str(bash_output))
+                return bash_output
 
             def bash_command_shell(*args):
                 global minc_counter
                 bash_output_shell = subprocess.check_output(args, shell=True, universal_newlines=True, executable='/bin/bash')
                 write_to_minc_dict(args)
                 print_and_write(str(bash_output_shell))
+                return bash_output_shell
             
             mylist = []
             xfmlist = []
@@ -188,10 +208,8 @@ def main(patient_folder):
             """
             #0. Split the PET file into single frames - un-comment if this step is desired
             
-            number_frames_subprocess = ['mincinfo', '-dimlength', 'time', str(PETpath)]
-            number_frames = subprocess.check_output(number_frames_subprocess, universal_newlines = True)
+            number_frames = bash_command(['mincinfo', '-dimlength', 'time', PETpath], universal_newlines = True)
             print_and_write("number of time frames extracted is", number_frames)
-            write_to_minc_dict(number_frames_subprocess)
             number_frames = int(number_frames)
             staticfiles = []
             for t in range(number_frames):
@@ -247,10 +265,8 @@ def main(patient_folder):
             # 6A. Take the SUVR in MNIspace      
             #think about whether we want this resampling to be done
             """
-            number_regions_subprocess = ['volume_stats', '-quiet', '-max', mask_or_atlas_path]
-            number_regions = subprocess.check_output(number_regions_subprocess, universal_newlines = True)
+            number_regions = bash_command(['volume_stats', '-quiet', '-max', mask_or_atlas_path], universal_newlines = True)
             print_and_write("The number of regions in the atlas is", number_regions)
-            write_to_minc_dict(number_regions_subprocess)
             if int(number_regions) > 1:
                 mask_or_atlas_resampled = patient_folder + "/_atlas_mask_resampled_" + patient_code + ".mnc "
                 bash_command('mincresample', '-clobber', '-like', outputPETpath, '-nearest', mask_or_atlas_path, mask_or_atlas_resampled)
@@ -270,9 +286,7 @@ def main(patient_folder):
                 print_and_write("minicsv is:", minicsv)
                 maskbinvalue = minicsv
 
-            mask_SUV_subprocess = ['mincstats', '-mask', str(mask_or_atlas_path), '-mask_binvalue', str(maskbinvalue), str(outputPETpath), '-mean']
-            mask_SUV = subprocess.check_output(mask_SUV_subprocess, universal_newlines = True)
-            write_to_minc_dict(mask_SUV_subprocess)
+            mask_SUV = bash_command('mincstats', '-mask', mask_or_atlas_path, '-mask_binvalue', maskbinvalue, outputPETpath, '-mean')
             print_and_write("The raw output given by mincstats (in MNI-space) is", mask_SUV)
             mask_SUV_split = mask_SUV.split()
 
@@ -306,9 +320,7 @@ def main(patient_folder):
             
             PETsubjectmask = patient_folder + "/_" + patient_code + "_subject_mask.mnc"
             bash_command('mincresample', '-clobber', '-like', mylist_patient[-2], '-nearest', '-transform', outputPETpath_xfm, '-invert_transformation', mask_or_atlas_path, PETsubjectmask)
-            mask_SUV_patient_subprocess = ['mincstats', '-mask', str(PETsubjectmask), '-mask_binvalue', str(maskbinvalue), str(mylist_patient[-2]), '-mean']
-            mask_SUV_patient = subprocess.check_output(mask_SUV_patient_subprocess, universal_newlines = True)
-            write_to_minc_dict(mask_SUV_patient_subprocess)
+            mask_SUV_patient = bash_command('mincstats', '-mask', PETsubjectmask, '-mask_binvalue', maskbinvalue, mylist_patient[-2], '-mean')
             print_and_write("The raw output given by mincstats (in patient-space) is:", mask_SUV_patient)
 
             mask_SUV_patient_split = mask_SUV_patient.split()
