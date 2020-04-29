@@ -23,14 +23,15 @@ parser.add_argument('patient_folder')
 
 args = parser.parse_args()
 
-def splice(path: Path, modifier) -> Path:
+def splice(path: Path, modifier, warning = False) -> Path:
     dir_name = str(os.path.dirname(path))
     base_name = str(os.path.basename(path))
     base_count = base_name.count(".")
     if base_count > 1:
         base_count_until_last = base_count-1 
-        newbase = base_name.replace('.','-', base_count_until_last)
-        print("Your file names will be named ---", newbase, "--- Extra periods '.' have been removed.")
+        newbase = base_name.replace('.','-', base_count_until_last) 
+        if warning == True:
+            print("The generated files will be named:", newbase, "\nPeriods other than the assumed file extension, '.' have been removed.")
         newbase = Path(newbase)
         dir_name = Path(dir_name)
         path = dir_name / newbase
@@ -41,10 +42,6 @@ def main(patient_folder):
     output_txt_file = patient_folder + '/_'+ patient_code + '_output_log.txt'
     command_log_file = patient_folder + '/_'+ patient_code + '_command_log.csv'
    
-    minc_cmd_dict = {}
-    global minc_counter
-    minc_counter = 0 
-
     with open(output_txt_file, 'w') as f:
         with open(command_log_file, 'w') as g:
                      
@@ -59,6 +56,10 @@ def main(patient_folder):
                 print(my_output + "\n")
                 f.write(my_output + "\n")
 
+            minc_cmd_dict = {}
+            global minc_counter
+            minc_counter = 0 
+            
             def write_to_minc_dict(minc_command_list):
                 global minc_counter
                 minc_command_list = [str(c) for c in minc_command_list]
@@ -76,9 +77,9 @@ def main(patient_folder):
 
             def ask_consent(recursion=False):
                 if recursion == False:
-                    warning_text = "WARNING! json file not detected by the program. \n It is supposed to be located at " + json_path + " Have you changed its location or have you renamed the file to something other than config.json? \n Would you like the program to continue with the default settings (y/n)? "       
+                    warning_text = "WARNING! json file not detected by the program. It is supposed to be located at " + str(json_path) + " Have you changed its location or have you renamed the file to something other than config.json? \n Would you like the program to continue with the default settings (y/n)? "       
                 elif recursion == True:
-                    warning_text = "Would you like the program continue with the default settings (Y/N)? "
+                    warning_text = "Would you like the program continue with the default settings (y/n)? "
                 f.write(warning_text)
                 user_choice = input(warning_text)
                 if user_choice == 'Y' or user_choice ==  'y':
@@ -146,22 +147,22 @@ def main(patient_folder):
             elif Path(gridpath[0]).parent != (Path(talpath[0]).parent or Path(ITpath[0]).parent) :
                 print_and_write("Your grid file needs to be in the same folder as the TAL and IT files (CIVET)! This is likely to cause a problem later during the transformation stage")
             
-            def check_file_structure(input_path, input_suffix, MRImessage = 0):
-                if len(input_path) > 1:
-                    print_and_write("Multiple", input_path, "files ending in", input_suffix, ". Check that there are only one patient's files in this patient folder!")
+            
+            def check_file_structure(input_path_list, input_path_list_name, input_suffix, MRImessage = 0):
+                if len(input_path_list) > 1:
+                    print_and_write("Multiple", input_path_list_name, "files ending in suffix:","'"+ input_suffix +"'", ".Check that there are only one patient's files in this patient folder!")
                     if MRImessage == 1:
                         print_and_write("Did you check that only one CIVET-processed MRI file is in this folder (not raw MRI files?")
                     sys.exit(0)
-
-                elif len(input_path) == 0: 
-                    print_and_write("No file found. Please check that your", input_path, "ends in", input_suffix)
+                elif len(input_path_list) == 0:  
+                    print_and_write("No file found. Please check that your", input_path_list_name, "file ends in suffix:","'" + input_suffix + "'")
                     sys.exit(0)
             
-            check_file_structure(PETpath,PETsuffix)
-            check_file_structure(MRIpath, MRIsuffix, 1)
-            check_file_structure(talpath, talsuffix)
-            check_file_structure(ITpath, ITsuffix)
-            check_file_structure(weight_dose_path, weight_dose_suffix)
+            check_file_structure(PETpath, "PET", PETsuffix)
+            check_file_structure(MRIpath, "MRI", MRIsuffix, 1)
+            check_file_structure(talpath, "tal", talsuffix)
+            check_file_structure(ITpath, "IT", ITsuffix)
+            check_file_structure(weight_dose_path, "weight_dose", weight_dose_suffix)
 
             PETpath = Path(PETpath[0])
             MRIpath = Path(MRIpath[0])
@@ -226,7 +227,7 @@ def main(patient_folder):
             
             # 2. Average the PET frames
 
-            outputPETpath = splice(outputPETpath, '_avg')
+            outputPETpath = splice(outputPETpath, '_avg', True)
             mylist.append(outputPETpath)
             bash_command('mincaverage', '-clobber', mylist[-2], outputPETpath, '-avgdim', 'time')
 
