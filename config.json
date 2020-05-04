@@ -3,10 +3,14 @@
   "MRI_SUFFIX": "t1.mnc",
   "TAL_SUFFIX": "t1_tal.xfm",
   "IT_SUFFIX": "_It.xfm",
-  "MNI_TEMPLATE_PATH": "/home/minc/project_folder/mni_icbm152_t1_tal_nlin_sym_09c.mnc",
-  "MASK_OR_ATLAS_PATH": "/home/minc/project_folder/WM_0.99_new.mnc",
+  "WEIGHT_DOSE_SUFFIX": "weight_dose.txt",
+  "MNI_TEMPLATE_PATH": "/home/minc/Desktop/templates_atlases_masks_ROIs/mni_icbm152_t1_tal_nlin_sym_09c.mnc",
+  "MASK_OR_ATLAS_PATH": "/home/minc/Desktop/templates_atlases_masks_ROIs/WM_0.99_new.mnc",
+  "SHOULD_MASK_OR_ATLAS_BE_RESAMPLED": false,
   "MASK_BIN_VALUE": [1],
   "MINC_CONFIG_PATH": "/opt/minc/1.9.17/minc-toolkit-config.sh", 
   "MINC_BEST_LIN_REG_PATH": "/opt/minc/1.9.17/bin/bestlinreg_s",
-  "PREFERRED_BLUR": [6, 8, 10]
+  "PREFERRED_BLUR": [8],
+  "PERFORM_PATIENT_SPACE_ANALYSES": false,
+  "SHOW_IMAGES": false
 }
