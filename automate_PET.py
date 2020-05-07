@@ -201,12 +201,11 @@ def main(patient_folder):
             outputPETpath = mylist[-1]
             outputPETpath_xfm = outputPETpath.with_suffix('.xfm')
             xfmlist.append(outputPETpath_xfm)
-            
+
             """
             #0. Split the PET file into single frames - un-comment if this step is desired
-            
+            print_and_write("#0. Split the PET file into single frames")
             number_frames = int(number_frames)
-            staticfiles = []
             for t in range(number_frames):
                 t = str(t)
                 staticfile = patient_folder+"/_" + patient_code + "frame_{}.mnc".format(t)
