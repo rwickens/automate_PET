@@ -11,6 +11,6 @@
   "MINC_CONFIG_PATH": "/opt/minc/1.9.17/minc-toolkit-config.sh", 
   "MINC_BEST_LIN_REG_PATH": "/opt/minc/1.9.17/bin/bestlinreg_s",
   "PREFERRED_BLUR": [8],
-  "PERFORM_PATIENT_SPACE_ANALYSES": false,
-  "SHOW_IMAGES": false
+  "PERFORM_PATIENT_SPACE_ANALYSES": true,
+  "SHOW_IMAGES": true
 }
