@@ -270,16 +270,7 @@ def main(patient_folder):
             if len(maskbinvalue) == 1:
                 maskbinvalue = maskbinvalue[0]
             else:
-                minicsv = ""
-                counter = 0
-                for i in maskbinvalue:
-                    counter += 1
-                    i = str(i)
-                    minicsv += i
-                    if counter != len(maskbinvalue):
-                        minicsv += ","
-                print_and_write("minicsv is:", minicsv)
-                maskbinvalue = minicsv
+                maskbinvalue = str(tuple(maskbinvalue)).replace(" ", "").replace("(", "").replace(")", "")
 
             try: 
                 mask_SUV = bash_command('mincstats', '-mask', mask_or_atlas_path, '-mask_binvalue', maskbinvalue, outputPETpath, '-mean')
