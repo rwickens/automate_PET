@@ -283,7 +283,7 @@ def main(patient_folder):
             means_array = [float(mask_SUV_split[i]) for i in range(len(mask_SUV_split)) if i != 0 and mask_SUV_split[i-1] == 'Mean:']
             print_and_write("The mean(s) of the reference region mask areas (in MNI-space) are:", means_array)
             if 0.0 in means_array:
-                print_and_write("The output for at least one of your reference region mask areas is 0.0, which means that the corresponding binvalue does not exist, or that the area is outside the skull/scalp")
+                print_and_write("The output for at least one of your reference region mask areas is 0.0, which means that the corresponding binvalue does not exist, or that the area is outside the skull/scalp.\nThe program will now terminate"")
                 sys.exit(0)
             mask_SUV = statistics.mean(means_array)
 
