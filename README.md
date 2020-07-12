@@ -1,7 +1,5 @@
 # Automate PET - Bedard lab
 
-Hi, I'm Rebekah Wickens, and I'm a PhD student of Marc-Andre Bedard (Montreal Neurological Institute). 
-
 I've written a pipeline in Python for quantitative PET image processing on MINC files. 
 
 This program assumes that the patient's MRI file has been spatially normalized on CIVET, and that the xfm files for this transformation have been kept.  
