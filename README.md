@@ -24,3 +24,7 @@ The steps that the pipeline achieves are:
 - In the project directory, keep the JSON configuration file. In this file, you can change defaults (e.g, mask (reference tissue) used, standard template used), and suffixes for your file naming conventions.  
 - If the JSON config is not present, program will look for WM mask file (WM_0.99_new.mnc) and MNI standard template file (mni_icbm152_t1_tal_nlin_sym_09c.mnc) in this project folder.
 - Note: This program will overwrite files (if the file name of one of your ouputs already exists in that folder).   
+
+----------------------------------------------
+
+Additional programs: automate_mincstats and mincmorph. They each require a json file, samples provided. 
