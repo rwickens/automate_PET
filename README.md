@@ -1,6 +1,6 @@
-# Automate PET - Bedard lab
+# Automate PET
 
-I've written a pipeline in Python for quantitative PET image processing on MINC files. 
+Pipeline in Python for quantitative PET image processing on MINC files. 
 
 This program assumes that the patient's MRI file has been spatially normalized on CIVET, and that the xfm files for this transformation have been kept.  
 
