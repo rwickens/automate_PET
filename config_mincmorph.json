@@ -1,5 +1,7 @@
 {
-    "TTEST_FILE_FULL_PATH": "/home/minc/Desktop/RBD_and_PD_2021-07-30/Statistics/Parkinsons/ttest.mnc",
-    "STATS_THRESHOLD": 2.2, 
-    "CLUSTER_THRESHOLD": 100
+    "TTEST_FILE_FULL_PATH": "/home/minc/Desktop/RBD_and_PD_2021-07-30/Statistics/Figure_out_iRBD_differences_old_new/Standard_age_group_regression/ttest_iRBD_control.mnc",
+    "STATS_THRESHOLD": 2.3, 
+    "CLUSTER_THRESHOLD": 50,
+    "BBMASK_FILE": "/home/minc/Desktop/templates_atlases_masks_ROIs/black_border_mask/mni_icbm152_t1_tal_nlin_sym_09c_mask.mnc",
+    "TEMPLATE_FILE": "/home/minc/Desktop/templates_atlases_masks_ROIs/MNI_templates/icbm152_t1_tal_nlin_sym_09c.mnc"
 }
