@@ -34,7 +34,7 @@ def main(json_file):
 
     STATS_THRESHOLD_MOD = str(STATS_THRESHOLD).replace('.', 'pt')
     #Invert the t-test file : 
-    INVERTED_T_TEST_FILE = splice(TTEST_FILE_FULL_PATH, '_INVERTED_')
+    INVERTED_T_TEST_FILE = splice(TTEST_FILE_FULL_PATH, '_INVERTED')
     bash_command('mincmath', '-clobber', '-mult', TTEST_FILE_FULL_PATH, '-const', '-1', INVERTED_T_TEST_FILE)
     #mincmath –mult ttestfile.mnc –const -1 ttestfile-INV.mnc
     
