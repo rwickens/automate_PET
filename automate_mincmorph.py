@@ -35,7 +35,7 @@ def main(json_file):
         df.dropna(inplace=True)
         CLUSTER_THRESHOLD = int(CLUSTER_THRESHOLD)
         cluster_rank = int(df[df.counts >= CLUSTER_THRESHOLD]['bin'].tail(1).values[0])
-        return cluster_rank
+        return (cluster_rank + 1)
 
     with open(output_txt_file, 'w') as f:
         with open(command_log_file, 'w') as g:
