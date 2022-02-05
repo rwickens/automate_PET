@@ -1,4 +1,4 @@
-# Automate PET
+# PET pipeline automation
 
 Pipeline in Python for quantitative PET image processing on MINC files. 
 
@@ -27,4 +27,4 @@ The steps that the pipeline achieves are:
 
 ----------------------------------------------
 
-Additional programs: automate_mincstats and mincmorph. They each require a json file, samples provided. 
+**Additional programs**: automate_mincstats and mincmorph. They each require a json file, samples provided. 
