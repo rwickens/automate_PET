@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from mailbox import linesep
 import os
 import subprocess
 from pathlib import Path
@@ -88,11 +89,19 @@ def main(json_file):
 
             #apply the threshold mask to t-test
             STATS_THRESHOLD_MAP_FILE = splice(TTEST_FILE_FULL_PATH, '_stats_threshold_t_map_'+ STATS_THRESHOLD_MOD)
-            bash_command('mincmask', '-clobber', TTEST_FILE_FULL_PATH, STATS_THRESHOLD_MASK_FILE, STATS_THRESHOLD_MAP_FILE)
+            #bash_command('mincmask', '-clobber', TTEST_FILE_FULL_PATH, STATS_THRESHOLD_MASK_FILE, STATS_THRESHOLD_MAP_FILE)
+            #replace with multiplication only
+            bash_command('mincmath', '-mult','-clobber', TTEST_FILE_FULL_PATH, STATS_THRESHOLD_MASK_FILE, STATS_THRESHOLD_MAP_FILE)
+            #mincmath -mult <inputfile> <maskfile>.tmp <outputfile>
+
 
             #apply the threshold mask to the inverted t-test
             INVERTED_STATS_THRESHOLD_MAP_FILE = splice(INVERTED_T_TEST_FILE, '_stats_threshold_t_map_'+ STATS_THRESHOLD_MOD)
-            bash_command('mincmask', '-clobber', INVERTED_T_TEST_FILE, INVERTED_STATS_THRESHOLD_MASK_FILE, INVERTED_STATS_THRESHOLD_MAP_FILE)
+            #bash_command('mincmask', '-clobber', INVERTED_T_TEST_FILE, INVERTED_STATS_THRESHOLD_MASK_FILE, INVERTED_STATS_THRESHOLD_MAP_FILE)
+            #replace with multiplication only
+            bash_command('mincmath', '-mult', '-clobber', INVERTED_T_TEST_FILE, INVERTED_STATS_THRESHOLD_MASK_FILE, INVERTED_STATS_THRESHOLD_MAP_FILE)
+            #mincmath -mult <inputfile> <maskfile>.tmp <outputfile>
+
 
             #use mincmorph to find the groups (using a 3D 6 connectivity kernel) - mincmorph will order the groups by size. 
             GROUPS_MINCMORPH_FILE = splice(TTEST_FILE_FULL_PATH, '_t_'+ STATS_THRESHOLD_MOD + '_groups_mincmorph')
